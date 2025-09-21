@@ -64,3 +64,5 @@ if __name__ == "__main__":
         print("   - iPhone 15 PRO 256gb")
     else:
         print("\n❌ Проблема с подключением к боту")
+
+

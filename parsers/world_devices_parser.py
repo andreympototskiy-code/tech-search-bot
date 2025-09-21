@@ -14,13 +14,16 @@ class WorldDevicesParser(BaseParser):
         if not response:
             return []
         
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.text, 'html.parser')
         products = []
         
-        # Поиск товаров на странице - различные возможные селекторы
-        product_elements = soup.find_all('div', class_=['product-item', 'product-card', 'item'])
+        # Поиск товаров на странице - используем правильный селектор
+        product_elements = soup.select('.product-layout')
         
-        # Если не нашли по основным селекторам, ищем по другим
+        # Если не нашли по основному селектору, пробуем другие
+        if not product_elements:
+            product_elements = soup.find_all('div', class_=['product-item', 'product-card', 'item'])
+        
         if not product_elements:
             product_elements = soup.find_all('div', {'data-product': True})
         
@@ -42,11 +45,17 @@ class WorldDevicesParser(BaseParser):
             
             # Пробуем разные варианты селекторов для названия
             title_selectors = [
-                'a.product-name',
-                '.product-title a',
-                '.product-item-name',
+                'a[href*="/smartfony/"]',  # Основной селектор для World Devices
+                '.caption h4 a',
+                '.caption h3 a',
+                '.caption h2 a',
+                '.caption a',
+                'h4 a',
                 'h3 a',
                 'h2 a',
+                '.product-name a',
+                '.product-title a',
+                '.product-item-name',
                 '.name a',
                 'a[href*="/product/"]',
                 '.title a'
@@ -67,19 +76,28 @@ class WorldDevicesParser(BaseParser):
             # Цена - различные возможные селекторы
             price_elem = None
             price_selectors = [
+                '.price-new',
                 '.price',
                 '.product-price',
                 '.cost',
                 '.price-current',
                 '.current-price',
                 '[class*="price"]',
-                '.value'
+                '.value',
+                'text'  # Ищем по тексту, содержащему "р."
             ]
             
             for selector in price_selectors:
-                price_elem = product_element.select_one(selector)
-                if price_elem:
-                    break
+                if selector == 'text':
+                    # Ищем текст с ценой
+                    price_texts = product_element.find_all(string=lambda text: text and 'р.' in str(text))
+                    if price_texts:
+                        price_elem = price_texts[0].parent  # Берем родительский элемент
+                        break
+                else:
+                    price_elem = product_element.select_one(selector)
+                    if price_elem:
+                        break
             
             if not price_elem:
                 return None

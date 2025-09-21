@@ -97,3 +97,5 @@ gh repo create andreympototskiy-code/tech-search-bot --public --source=. --remot
 
 Проект будет доступен всем пользователям GitHub с подробной документацией и инструкциями по установке.
 
+
+

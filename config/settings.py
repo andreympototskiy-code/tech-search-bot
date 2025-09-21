@@ -4,12 +4,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Telegram Bot настройки
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8443193400:AAEiK_YvNHrgvQwUOJtI5Hp-OHoo-_-ucj0')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '312949483')
+# Токены должны быть установлены в переменных окружения или .env файле
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+
+# Проверка наличия токенов
+if not TELEGRAM_BOT_TOKEN:
+    raise ValueError("TELEGRAM_BOT_TOKEN не установлен! Создайте .env файл с токеном.")
+if not TELEGRAM_CHAT_ID:
+    raise ValueError("TELEGRAM_CHAT_ID не установлен! Создайте .env файл с Chat ID.")
 
 # Настройки поиска
 SEARCH_INTERVAL_HOURS = 0  # Отключен автоматический поиск
 MAX_RESULTS = 3
+REQUEST_DELAY_SECONDS = 20  # Задержка между запросами 20 секунд
 
 # База данных
 DATABASE_PATH = 'data/search_results.db'
@@ -48,7 +56,7 @@ STORES = [
     {
         'name': 'М.Видео',
         'url': 'https://www.mvideo.ru/',
-        'search_url': 'https://www.mvideo.ru/products/search?q={query}',
+        'search_url': 'https://www.mvideo.ru/products/search?q={query}&category=smartfony-205',
         'parser': 'mvideo'
     },
     {
