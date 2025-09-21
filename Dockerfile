@@ -25,3 +25,4 @@ EXPOSE 5000
 
 # Команда по умолчанию
 CMD ["python", "main.py", "web"]
+

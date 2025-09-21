@@ -65,3 +65,4 @@ class EldoradoParser(BaseParser):
             print(f"Ошибка при парсинге товара Эльдорадо: {e}")
             return None
 
+

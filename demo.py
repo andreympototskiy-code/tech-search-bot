@@ -105,3 +105,4 @@ if __name__ == '__main__':
     print("\nДля ручного поиска используйте:")
     print("python main.py search --query 'ваш запрос'")
 
+

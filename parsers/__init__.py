@@ -8,3 +8,4 @@ PARSERS = {
     'mvideo': MVideoParser
 }
 
+

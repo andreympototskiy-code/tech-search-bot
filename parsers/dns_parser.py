@@ -65,3 +65,4 @@ class DNSParser(BaseParser):
             print(f"Ошибка при парсинге товара DNS: {e}")
             return None
 
+

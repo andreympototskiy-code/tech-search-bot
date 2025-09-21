@@ -65,3 +65,4 @@ class CitilinkParser(BaseParser):
             print(f"Ошибка при парсинге товара Ситилинк: {e}")
             return None
 
+

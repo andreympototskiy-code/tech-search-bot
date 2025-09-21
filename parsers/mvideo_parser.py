@@ -65,3 +65,4 @@ class MVideoParser(BaseParser):
             print(f"Ошибка при парсинге товара М.Видео: {e}")
             return None
 
+

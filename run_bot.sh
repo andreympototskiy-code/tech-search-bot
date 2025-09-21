@@ -35,3 +35,4 @@ echo ""
 
 # Запускаем бота
 python main.py telegram-bot
+
