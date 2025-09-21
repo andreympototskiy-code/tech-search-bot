@@ -118,7 +118,7 @@ jobs:
     
     - name: Run security checks with bandit
       run: |
-        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . -f json -o bandit-report.json
         bandit -r . -ll
     
     - name: Check for known security vulnerabilities

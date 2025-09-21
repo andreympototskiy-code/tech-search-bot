@@ -28,12 +28,12 @@ class BaseParser(ABC):
     def get_page(self, url, max_retries=3):
         """Получение страницы с повторными попытками"""
         for attempt in range(max_retries):
-                try:
-                    # Задержка между запросами 20 секунд
-                    from config.settings import REQUEST_DELAY_SECONDS
-                    delay = REQUEST_DELAY_SECONDS
-                    print(f"Задержка {delay} сек перед запросом к {self.store_name}")
-                    time.sleep(delay)
+            try:
+                # Задержка между запросами 20 секунд
+                from config.settings import REQUEST_DELAY_SECONDS
+                delay = REQUEST_DELAY_SECONDS
+                print(f"Задержка {delay} сек перед запросом к {self.store_name}")
+                time.sleep(delay)
                 
                 # Добавляем Referer для реалистичности
                 if 'pitergsm.ru' in url:
@@ -43,15 +43,15 @@ class BaseParser(ABC):
                 elif 'gsm-store.ru' in url:
                     self.session.headers.update({'Referer': 'https://gsm-store.ru/'})
                 
-                    response = self.session.get(url, timeout=15, allow_redirects=True)
-                    response.raise_for_status()
-                    
-                    # Исправляем проблему с кодировкой для некоторых сайтов
-                    if 'pitergsm.ru' in url and response.headers.get('content-encoding') == 'br':
-                        # Для PiterGSM принудительно устанавливаем UTF-8
-                        response.encoding = 'utf-8'
-                    
-                    return response
+                response = self.session.get(url, timeout=15, allow_redirects=True)
+                response.raise_for_status()
+                
+                # Исправляем проблему с кодировкой для некоторых сайтов
+                if 'pitergsm.ru' in url and response.headers.get('content-encoding') == 'br':
+                    # Для PiterGSM принудительно устанавливаем UTF-8
+                    response.encoding = 'utf-8'
+                
+                return response
             except Exception as e:
                 print(f"Ошибка при получении страницы {url} (попытка {attempt + 1}): {e}")
                 if attempt == max_retries - 1:

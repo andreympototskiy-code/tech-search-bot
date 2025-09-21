@@ -53,6 +53,9 @@ def test_base_parser():
             
             def search_products(self, query):
                 return []
+            
+            def parse_product(self, product_element):
+                return None
         
         parser = TestParser()
         assert parser.store_name == "Test Store"
