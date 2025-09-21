@@ -1,0 +1,202 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, '3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov flake8 black
+    
+    - name: Lint with flake8
+      run: |
+        # Остановить сборку при наличии ошибок линтера
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Остальные ошибки только предупреждения
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Check code formatting with black
+      run: |
+        black --check --diff .
+    
+    - name: Test imports
+      run: |
+        python -c "import config.settings; print('✅ Settings imported successfully')"
+        python -c "from parsers import *; print('✅ All parsers imported successfully')"
+        python -c "from search_engine import SearchEngine; print('✅ Search engine imported successfully')"
+        python -c "from telegram_search_bot import TelegramSearchBot; print('✅ Telegram bot imported successfully')"
+    
+    - name: Test configuration
+      run: |
+        python -c "
+        from config.settings import *
+        assert SEARCH_INTERVAL_HOURS == 0, 'Auto search should be disabled'
+        assert REQUEST_DELAY_SECONDS == 20, 'Request delay should be 20 seconds'
+        assert MAX_RESULTS == 3, 'Max results should be 3'
+        print('✅ Configuration tests passed')
+        "
+    
+    - name: Test parser initialization
+      run: |
+        python -c "
+        from parsers.pitergsm_parser import PiterGSMParser
+        from parsers.world_devices_parser import WorldDevicesParser
+        
+        # Тестируем инициализацию парсеров
+        pitergsm = PiterGSMParser()
+        world_devices = WorldDevicesParser()
+        
+        assert pitergsm.store_name == 'PiterGSM'
+        assert world_devices.store_name == 'World Devices'
+        print('✅ Parser initialization tests passed')
+        "
+    
+    - name: Test search engine initialization
+      run: |
+        python -c "
+        from search_engine import SearchEngine
+        
+        # Тестируем инициализацию поисковой системы
+        engine = SearchEngine()
+        assert hasattr(engine, 'parsers'), 'Search engine should have parsers'
+        print('✅ Search engine initialization test passed')
+        "
+    
+    - name: Test web interface
+      run: |
+        python -c "
+        import sys
+        sys.path.append('.')
+        from web_interface.app import app
+        
+        # Тестируем создание Flask приложения
+        assert app is not None, 'Flask app should be created'
+        print('✅ Web interface test passed')
+        "
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+    
+    - name: Run security checks with bandit
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . -ll
+    
+    - name: Check for known security vulnerabilities
+      run: |
+        pip install -r requirements.txt
+        safety check --json --output safety-report.json || true
+        safety check
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        docker build -t tech-search-bot:test .
+        echo "✅ Docker image built successfully"
+    
+    - name: Test Docker image
+      run: |
+        # Проверяем, что контейнер запускается
+        docker run --rm tech-search-bot:test python -c "print('✅ Docker container test passed')"
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Create test environment file
+      run: |
+        echo "TELEGRAM_BOT_TOKEN=test_token" > .env
+        echo "TELEGRAM_CHAT_ID=123456789" >> .env
+    
+    - name: Test main entry points
+      run: |
+        # Тестируем основные точки входа
+        python main.py --help
+        python -c "from telegram_search_bot import main; print('✅ Telegram bot entry point OK')"
+        python -c "from web_interface.app import app; print('✅ Web interface entry point OK')"
+    
+    - name: Test parser functionality (without network)
+      run: |
+        python -c "
+        # Тестируем парсеры без сетевых запросов
+        from parsers.base_parser import BaseParser
+        
+        class TestParser(BaseParser):
+            def __init__(self):
+                super().__init__('Test Store')
+            
+            def search_products(self, query):
+                return []
+        
+        parser = TestParser()
+        assert parser.store_name == 'Test Store'
+        print('✅ Parser functionality test passed')
+        "
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test, security, docker, integration-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+    - name: Deploy notification
+      run: |
+        echo "🚀 Deployment would happen here"
+        echo "✅ All tests passed - ready for deployment"

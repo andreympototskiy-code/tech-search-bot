@@ -5,3 +5,11 @@ lxml==4.9.3
 python-telegram-bot==20.7
 schedule==1.2.0
 python-dotenv==1.0.0
+
+# Тестовые зависимости
+pytest>=7.0.0
+pytest-cov>=4.0.0
+flake8>=6.0.0
+black>=23.0.0
+bandit>=1.7.0
+safety>=2.0.0
