@@ -1,0 +1,59 @@
+# Примеры запросов для поиска техники
+
+## Смартфоны
+Apple iPhone 15 PRO 256gb
+Samsung Galaxy S24 128gb
+Xiaomi 13 Ultra 512gb
+OnePlus 11 256gb
+Google Pixel 8 Pro 128gb
+iPhone 14 Pro Max 512gb
+Samsung Galaxy Z Fold 5
+
+## Ноутбуки
+MacBook Air M2 256gb
+MacBook Pro M3 512gb
+ASUS ROG Strix G15
+Lenovo ThinkPad X1 Carbon
+Dell XPS 13
+
+## Игровые консоли
+PlayStation 5
+Xbox Series X
+Nintendo Switch OLED
+Steam Deck 512gb
+
+## Наушники и аудио
+AirPods Pro 2
+Sony WH-1000XM5
+Bose QuietComfort 45
+Sennheiser HD 660S
+
+## Планшеты
+iPad Pro 12.9 256gb
+iPad Air 5 64gb
+Samsung Galaxy Tab S9
+Microsoft Surface Pro 9
+
+## Умные часы
+Apple Watch Series 9
+Samsung Galaxy Watch 6
+Garmin Fenix 7
+Fitbit Versa 4
+
+## Фото и видео
+Canon EOS R6 Mark II
+Sony A7 IV
+GoPro Hero 12
+DJI Mini 4 Pro
+
+## Игровое оборудование
+RTX 4090
+RTX 4080
+PlayStation VR2
+Valve Index VR Kit
+
+## Компьютерные комплектующие
+Intel Core i7-13700K
+AMD Ryzen 7 7800X3D
+DDR5 32GB 5600MHz
+NVMe SSD 1TB

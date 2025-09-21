@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Детали поиска - {{ details.query }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-search"></i> {{ details.query }}</h1>
+        <a href="{{ url_for('history') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Назад к истории
+        </a>
+    </div>
+    
+    <div class="alert alert-info">
+        <h5><i class="fas fa-info-circle"></i> Информация о поиске</h5>
+        <p><strong>Запрос:</strong> {{ details.query }}</p>
+        <p><strong>Дата поиска:</strong> {{ details.created_at }}</p>
+        <p><strong>Найдено товаров:</strong> {{ details.results|length }}</p>
+    </div>
+    
+    {% if details.results %}
+        <h3><i class="fas fa-list"></i> Найденные товары</h3>
+        
+        <!-- Сортировка -->
+        <div class="mb-3">
+            <label for="sortSelect" class="form-label">Сортировка:</label>
+            <select class="form-select" id="sortSelect" style="width: auto; display: inline-block;">
+                <option value="price-asc">По цене (возрастание)</option>
+                <option value="price-desc">По цене (убывание)</option>
+                <option value="store">По магазину</option>
+                <option value="title">По названию</option>
+            </select>
+        </div>
+        
+        <div id="resultsContainer">
+            {% for result in details.results %}
+                <div class="card mb-3 result-item" 
+                     data-price="{{ result.price }}" 
+                     data-store="{{ result.store }}" 
+                     data-title="{{ result.title }}">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="card-title">{{ result.title }}</h5>
+                                <p class="card-text">
+                                    <span class="badge bg-primary">{{ result.store }}</span>
+                                    <small class="text-muted ms-2">
+                                        <i class="fas fa-clock"></i> {{ result.found_at }}
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="price-badge text-success mb-2">
+                                    {{ "{:,}".format(result.price).replace(",", " ") }} ₽
+                                </div>
+                                <a href="{{ result.link }}" target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-external-link-alt"></i> Перейти к товару
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> Товары не найдены
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#sortSelect').on('change', function() {
+        const sortBy = $(this).val();
+        const container = $('#resultsContainer');
+        const items = container.find('.result-item').toArray();
+        
+        items.sort(function(a, b) {
+            switch(sortBy) {
+                case 'price-asc':
+                    return parseInt($(a).data('price')) - parseInt($(b).data('price'));
+                case 'price-desc':
+                    return parseInt($(b).data('price')) - parseInt($(a).data('price'));
+                case 'store':
+                    return $(a).data('store').localeCompare($(b).data('store'));
+                case 'title':
+                    return $(a).data('title').localeCompare($(b).data('title'));
+                default:
+                    return 0;
+            }
+        });
+        
+        container.empty().append(items);
+    });
+});
+</script>
+{% endblock %}
+

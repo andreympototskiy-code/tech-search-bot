@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск техники - Главная{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="text-center mb-4">
+                    <i class="fas fa-search"></i> Поиск техники
+                </h1>
+                <p class="text-center mb-4">
+                    Введите описание техники для поиска по интернет-магазинам
+                </p>
+                
+                <form id="searchForm">
+                    <div class="input-group input-group-lg">
+                        <input type="text" 
+                               class="form-control" 
+                               id="searchQuery" 
+                               name="query"
+                               placeholder="Например: Apple iPhone 15 PRO 256gb"
+                               required>
+                        <button class="btn btn-warning" type="submit">
+                            <i class="fas fa-search"></i> Найти
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div id="loadingSpinner" class="text-center" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Поиск...</span>
+        </div>
+        <p class="mt-2">Выполняется поиск по магазинам...</p>
+    </div>
+
+    <div id="searchResults" style="display: none;">
+        <h2 class="mb-4">Результаты поиска</h2>
+        <div id="resultsContainer"></div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h3>Поддерживаемые магазины</h3>
+            <div class="row">
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-mobile-alt fa-2x text-primary mb-2"></i>
+                            <h6>PiterGSM</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-globe fa-2x text-success mb-2"></i>
+                            <h6>World Devices</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-store fa-2x text-warning mb-2"></i>
+                            <h6>GSM Store</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-laptop fa-2x text-info mb-2"></i>
+                            <h6>DNS</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-tv fa-2x text-danger mb-2"></i>
+                            <h6>М.Видео</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-headphones fa-2x text-secondary mb-2"></i>
+                            <h6>Эльдорадо</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-desktop fa-2x text-dark mb-2"></i>
+                            <h6>Ситилинк</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const query = $('#searchQuery').val().trim();
+        if (!query) {
+            alert('Введите запрос для поиска');
+            return;
+        }
+        
+        // Показываем спиннер
+        $('#loadingSpinner').show();
+        $('#searchResults').hide();
+        
+        // Выполняем поиск
+        $.ajax({
+            url: '/search',
+            method: 'POST',
+            data: {
+                query: query
+            },
+            success: function(response) {
+                $('#loadingSpinner').hide();
+                displayResults(response.results);
+            },
+            error: function(xhr) {
+                $('#loadingSpinner').hide();
+                const error = xhr.responseJSON ? xhr.responseJSON.error : 'Ошибка при поиске';
+                alert('Ошибка: ' + error);
+            }
+        });
+    });
+    
+    function displayResults(results) {
+        const container = $('#resultsContainer');
+        container.empty();
+        
+        // Информация о поиске
+        const searchInfo = `
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> Информация о поиске</h5>
+                <p><strong>Запрос:</strong> ${results.query}</p>
+                <p><strong>Найдено товаров:</strong> ${results.total_found}</p>
+                <p><strong>Время поиска:</strong> ${new Date(results.search_time).toLocaleString('ru-RU')}</p>
+            </div>
+        `;
+        container.append(searchInfo);
+        
+        // Топ результаты
+        if (results.top_results && results.top_results.length > 0) {
+            const topResultsHtml = `
+                <h4><i class="fas fa-trophy"></i> Топ ${results.top_results.length} самых дешевых</h4>
+                <div class="row">
+            `;
+            
+            results.top_results.forEach((result, index) => {
+                const resultCard = `
+                    <div class="col-md-4 mb-3">
+                        <div class="card result-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-primary">#${index + 1}</span>
+                                    <span class="badge bg-success store-badge">${result.store}</span>
+                                </div>
+                                <h6 class="card-title">${result.title}</h6>
+                                <div class="mt-auto">
+                                    <div class="price-badge text-success">${result.price.toLocaleString('ru-RU')} ₽</div>
+                                    <a href="${result.link}" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                                        <i class="fas fa-external-link-alt"></i> Перейти к товару
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.append(resultCard);
+            });
+            
+            container.append('</div>');
+        }
+        
+        // Результаты по магазинам
+        if (results.store_results) {
+            const storeResultsHtml = `
+                <h4 class="mt-4"><i class="fas fa-store"></i> Результаты по магазинам</h4>
+            `;
+            container.append(storeResultsHtml);
+            
+            Object.keys(results.store_results).forEach(storeName => {
+                const storeResults = results.store_results[storeName];
+                if (storeResults.length > 0) {
+                    const storeHtml = `
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5><i class="fas fa-store"></i> ${storeName} (${storeResults.length} товаров)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                    `;
+                    
+                    storeResults.forEach(result => {
+                        const resultHtml = `
+                            <div class="col-md-6 mb-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted">${result.title}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-success">${result.price.toLocaleString('ru-RU')} ₽</span>
+                                        <a href="${result.link}" target="_blank" class="btn btn-sm btn-outline-primary ms-1">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.append(resultHtml);
+                    });
+                    
+                    container.append('</div></div></div>');
+                }
+            });
+        }
+        
+        $('#searchResults').show();
+    }
+});
+</script>
+{% endblock %}
+

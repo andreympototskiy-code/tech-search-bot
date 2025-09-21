@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  tech-search-web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env
+    command: python main.py web
+    restart: unless-stopped
+
+  tech-search-scheduler:
+    build: .
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env
+    command: python main.py scheduler
+    restart: unless-stopped
+    depends_on:
+      - tech-search-web

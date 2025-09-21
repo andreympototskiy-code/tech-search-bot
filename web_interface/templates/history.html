@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}История поисков - Поиск техники{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="fas fa-history"></i> История поисков</h1>
+    
+    {% if history %}
+        <div class="row">
+            {% for search in history %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-search"></i> {{ search.query }}
+                            </h5>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> {{ search.created_at }}
+                                </small>
+                            </p>
+                            <p class="card-text">
+                                <span class="badge bg-info">
+                                    <i class="fas fa-box"></i> {{ search.results_count }} товаров
+                                </span>
+                            </p>
+                            <a href="{{ url_for('search_details', query_id=search.id) }}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye"></i> Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> История поисков пуста
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
