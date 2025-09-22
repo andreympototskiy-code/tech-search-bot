@@ -115,14 +115,20 @@ class SearchEngine:
             result["relevance_score"] = relevance_score
             relevant_results.append(result)
         
-        # Если есть релевантные результаты, сортируем по релевантности, затем по цене
-        if relevant_results:
+        # Фильтруем товары с минимальной релевантностью
+        min_relevance = max(1, len(query_words) // 2)  # Минимум 1, или половина от количества слов в запросе
+        
+        # Берем только товары с достаточной релевантностью
+        filtered_results = [r for r in relevant_results if r["relevance_score"] >= min_relevance]
+        
+        if filtered_results:
+            # Сортируем по релевантности, затем по цене
+            filtered_results.sort(key=lambda x: (-x["relevance_score"], x["price"]))
+            top_results = filtered_results[:MAX_RESULTS]
+        else:
+            # Если нет достаточно релевантных товаров, берем самые релевантные из всех
             relevant_results.sort(key=lambda x: (-x["relevance_score"], x["price"]))
             top_results = relevant_results[:MAX_RESULTS]
-        else:
-            # Если релевантных результатов нет, берем самые дешевые
-            all_results.sort(key=lambda x: x["price"])
-            top_results = all_results[:MAX_RESULTS]
 
         return {
             "query": query,
