@@ -111,10 +111,9 @@ class SearchEngine:
                 if word in title_lower:
                     relevance_score += 1
             
-            # Если товар релевантен (содержит хотя бы одно ключевое слово), добавляем его
-            if relevance_score > 0:
-                result["relevance_score"] = relevance_score
-                relevant_results.append(result)
+            # Добавляем все товары с подсчетом релевантности
+            result["relevance_score"] = relevance_score
+            relevant_results.append(result)
         
         # Если есть релевантные результаты, сортируем по релевантности, затем по цене
         if relevant_results:
