@@ -47,6 +47,9 @@ jobs:
         black --check --diff .
     
     - name: Test imports
+      env:
+        TELEGRAM_BOT_TOKEN: "test_token"
+        TELEGRAM_CHAT_ID: "123456789"
       run: |
         python -c "import config.settings; print('✅ Settings imported successfully')"
         python -c "from parsers import *; print('✅ All parsers imported successfully')"
@@ -54,6 +57,9 @@ jobs:
         python -c "from telegram_search_bot import TelegramSearchBot; print('✅ Telegram bot imported successfully')"
     
     - name: Test configuration
+      env:
+        TELEGRAM_BOT_TOKEN: "test_token"
+        TELEGRAM_CHAT_ID: "123456789"
       run: |
         python -c "
         from config.settings import *
@@ -64,6 +70,9 @@ jobs:
         "
     
     - name: Test parser initialization
+      env:
+        TELEGRAM_BOT_TOKEN: "test_token"
+        TELEGRAM_CHAT_ID: "123456789"
       run: |
         python -c "
         from parsers.pitergsm_parser import PiterGSMParser
@@ -79,6 +88,9 @@ jobs:
         "
     
     - name: Test search engine initialization
+      env:
+        TELEGRAM_BOT_TOKEN: "test_token"
+        TELEGRAM_CHAT_ID: "123456789"
       run: |
         python -c "
         from search_engine import SearchEngine
@@ -90,6 +102,9 @@ jobs:
         "
     
     - name: Test web interface
+      env:
+        TELEGRAM_BOT_TOKEN: "test_token"
+        TELEGRAM_CHAT_ID: "123456789"
       run: |
         python -c "
         import sys
@@ -100,6 +115,13 @@ jobs:
         assert app is not None, 'Flask app should be created'
         print('✅ Web interface test passed')
         "
+    
+    - name: Run pytest tests
+      env:
+        TELEGRAM_BOT_TOKEN: "test_token"
+        TELEGRAM_CHAT_ID: "123456789"
+      run: |
+        python -m pytest tests/ -v
 
   security:
     runs-on: ubuntu-latest
