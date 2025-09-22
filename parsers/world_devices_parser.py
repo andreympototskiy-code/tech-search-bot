@@ -6,9 +6,13 @@ class WorldDevicesParser(BaseParser):
     def __init__(self):
         super().__init__("World Devices")
     
+    def get_search_url(self, query):
+        """Получение URL для поиска на World Devices"""
+        return f"https://world-devices.ru/search/?search={query}&description=true"
+    
     def search_products(self, query):
         """Поиск товаров на World Devices"""
-        search_url = f"https://world-devices.ru/search/?search={query}&description=true"
+        search_url = self.get_search_url(query)
         
         response = self.get_page(search_url)
         if not response:
@@ -20,15 +24,7 @@ class WorldDevicesParser(BaseParser):
         # Поиск товаров на странице - используем правильный селектор
         product_elements = soup.select('.product-layout')
         
-        # Если не нашли по основному селектору, пробуем другие
-        if not product_elements:
-            product_elements = soup.find_all('div', class_=['product-item', 'product-card', 'item'])
-        
-        if not product_elements:
-            product_elements = soup.find_all('div', {'data-product': True})
-        
-        if not product_elements:
-            product_elements = soup.find_all('article')
+        print(f"Найдено элементов товаров: {len(product_elements)}")
         
         for element in product_elements[:10]:
             product = self.parse_product(element)
@@ -45,7 +41,8 @@ class WorldDevicesParser(BaseParser):
             
             # Пробуем разные варианты селекторов для названия
             title_selectors = [
-                'a[href*="/smartfony/"]',  # Основной селектор для World Devices
+                '.product-thumb__name',  # Основной селектор для World Devices
+                'a[href*="/smartfony/"]',
                 '.caption h4 a',
                 '.caption h3 a',
                 '.caption h2 a',
@@ -76,6 +73,7 @@ class WorldDevicesParser(BaseParser):
             # Цена - различные возможные селекторы
             price_elem = None
             price_selectors = [
+                '.product-thumb__price',  # Основной селектор для World Devices
                 '.price-new',
                 '.price',
                 '.product-price',

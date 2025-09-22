@@ -50,6 +50,13 @@ class BaseParser(ABC):
                 if 'pitergsm.ru' in url and response.headers.get('content-encoding') == 'br':
                     # Для PiterGSM принудительно устанавливаем UTF-8
                     response.encoding = 'utf-8'
+                    # Дополнительно декодируем содержимое
+                    try:
+                        import brotli
+                        if response.content:
+                            response._content = brotli.decompress(response.content)
+                    except:
+                        pass
                 
                 return response
             except Exception as e:
@@ -60,11 +67,16 @@ class BaseParser(ABC):
                 time.sleep(random.uniform(5, 10))
         return None
     
+    def get_search_url(self, query):
+        """Получение URL для поиска"""
+        # Базовый метод, переопределяется в наследниках
+        return f"https://example.com/search?q={query}"
+
     @abstractmethod
     def search_products(self, query):
         """Поиск товаров по запросу"""
         pass
-    
+
     @abstractmethod
     def parse_product(self, product_element):
         """Парсинг информации о товаре"""

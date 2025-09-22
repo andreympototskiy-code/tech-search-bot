@@ -6,9 +6,13 @@ class GSMStoreParser(BaseParser):
     def __init__(self):
         super().__init__("GSM Store")
     
+    def get_search_url(self, query):
+        """Получение URL для поиска на GSM Store"""
+        return f"https://gsm-store.ru/?digiSearch=true&term={query}&params=%7Csort%3DDEFAULT"
+    
     def search_products(self, query):
         """Поиск товаров на GSM Store"""
-        search_url = f"https://gsm-store.ru/?digiSearch=true&term={query}&params=%7Csort%3DDEFAULT"
+        search_url = self.get_search_url(query)
         
         response = self.get_page(search_url)
         if not response:

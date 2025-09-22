@@ -55,3 +55,6 @@ if __name__ == "__main__":
     test_telegram_tokens_required()
     test_stores_configuration()
     print("🎉 Все тесты конфигурации прошли успешно!")
+
+
+

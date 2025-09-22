@@ -67,3 +67,6 @@ if __name__ == "__main__":
     test_search_engine_methods()
     test_database_initialization()
     print("🎉 Все тесты поисковой системы прошли успешно!")
+
+
+
