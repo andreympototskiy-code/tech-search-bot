@@ -22,7 +22,7 @@ class PiterGSMParser(BaseParser):
         products = []
         
         # Поиск товаров на странице
-        product_elements = soup.find_all('div', class_='product-item')
+        product_elements = soup.find_all('div', class_='prodcard')
         
         for element in product_elements[:10]:  # Ограничиваем до 10 результатов
             product = self.parse_product(element)
@@ -39,12 +39,14 @@ class PiterGSMParser(BaseParser):
             
             # Пробуем разные варианты селекторов для названия
             title_selectors = [
+                '.prodcard__name',  # Основной селектор для PiterGSM
                 'a.product-item-name',
                 '.product-title a',
                 'h3 a',
                 'h2 a',
                 '.name a',
                 'a[href*="/product/"]',
+                'a[href*="/catalog/"]',
                 '.title a'
             ]
             
@@ -63,6 +65,7 @@ class PiterGSMParser(BaseParser):
             # Цена - улучшенный поиск
             price_elem = None
             price_selectors = [
+                '.prodcard__price',  # Основной селектор для PiterGSM
                 'span.price',
                 '.price',
                 '.product-price',

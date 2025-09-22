@@ -30,13 +30,18 @@ DEBUG = True
 # Магазины для поиска (только рабочие)
 STORES = [
     {
+        'name': 'PiterGSM',
+        'url': 'https://pitergsm.ru/',
+        'search_url': 'https://pitergsm.ru/?digiSearch=true&term={query}&params=%7Csort%3DDEFAULT',
+        'parser': 'pitergsm'
+    },
+    {
         'name': 'World Devices',
         'url': 'https://world-devices.ru/',
         'search_url': 'https://world-devices.ru/search/?search={query}&description=true',
         'parser': 'world_devices'
     }
     # Временно отключены заблокированные магазины:
-    # - PiterGSM (проблемы с Brotli декодированием)
     # - GSM Store (403 Forbidden)
     # - DNS, М.Видео, Эльдорадо, Ситилинк (заблокированы)
 ]
