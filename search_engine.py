@@ -97,9 +97,33 @@ class SearchEngine:
                 print(f"Ошибка при поиске в {store_name}: {e}")
                 store_results[store_name] = []
 
-        # Сортируем по цене и берем топ результатов
-        all_results.sort(key=lambda x: x["price"])
-        top_results = all_results[:MAX_RESULTS]
+        # Фильтруем результаты по релевантности запроса
+        query_lower = query.lower()
+        relevant_results = []
+        
+        for result in all_results:
+            title_lower = result["title"].lower()
+            # Проверяем, содержит ли название товара ключевые слова из запроса
+            query_words = query_lower.split()
+            relevance_score = 0
+            
+            for word in query_words:
+                if word in title_lower:
+                    relevance_score += 1
+            
+            # Если товар релевантен (содержит хотя бы одно ключевое слово), добавляем его
+            if relevance_score > 0:
+                result["relevance_score"] = relevance_score
+                relevant_results.append(result)
+        
+        # Если есть релевантные результаты, сортируем по релевантности, затем по цене
+        if relevant_results:
+            relevant_results.sort(key=lambda x: (-x["relevance_score"], x["price"]))
+            top_results = relevant_results[:MAX_RESULTS]
+        else:
+            # Если релевантных результатов нет, берем самые дешевые
+            all_results.sort(key=lambda x: x["price"])
+            top_results = all_results[:MAX_RESULTS]
 
         return {
             "query": query,
