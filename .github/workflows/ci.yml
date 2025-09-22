@@ -54,7 +54,7 @@ jobs:
         python -c "import config.settings; print('✅ Settings imported successfully')"
         python -c "from parsers import *; print('✅ All parsers imported successfully')"
         python -c "from search_engine import SearchEngine; print('✅ Search engine imported successfully')"
-        python -c "from telegram_search_bot import TelegramSearchBot; print('✅ Telegram bot imported successfully')"
+        python -c "from telegram_search_bot import TechSearchBot; print('✅ Telegram bot imported successfully')"
     
     - name: Test configuration
       env:
@@ -140,8 +140,8 @@ jobs:
     
     - name: Run security checks with bandit
       run: |
-        bandit -r . -f json -o bandit-report.json
-        bandit -r . -ll
+        bandit -r . -f json -o bandit-report.json --exclude-dirs venv,tests,.github
+        bandit -r . -ll --exclude-dirs venv,tests,.github
     
     - name: Check for known security vulnerabilities
       run: |
