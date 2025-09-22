@@ -126,9 +126,14 @@ class SearchEngine:
             filtered_results.sort(key=lambda x: (-x["relevance_score"], x["price"]))
             top_results = filtered_results[:MAX_RESULTS]
         else:
-            # Если нет достаточно релевантных товаров, берем самые релевантные из всех
-            relevant_results.sort(key=lambda x: (-x["relevance_score"], x["price"]))
-            top_results = relevant_results[:MAX_RESULTS]
+            # Если нет достаточно релевантных товаров, берем только товары с релевантностью > 0
+            relevant_only = [r for r in relevant_results if r["relevance_score"] > 0]
+            if relevant_only:
+                relevant_only.sort(key=lambda x: (-x["relevance_score"], x["price"]))
+                top_results = relevant_only[:MAX_RESULTS]
+            else:
+                # Если вообще нет релевантных товаров, возвращаем пустой список
+                top_results = []
 
         return {
             "query": query,
