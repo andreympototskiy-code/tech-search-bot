@@ -49,7 +49,7 @@ class BaseParser(ABC):
                 elif "gsm-store.ru" in url:
                     self.session.headers.update({"Referer": "https://gsm-store.ru/"})
 
-                response = self.session.get(url, timeout=15, allow_redirects=True)
+                response = self.session.get(url, timeout=30, allow_redirects=True)
                 response.raise_for_status()
 
                 # Исправляем проблему с кодировкой для некоторых сайтов
