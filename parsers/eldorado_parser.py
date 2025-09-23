@@ -65,3 +65,5 @@ class EldoradoParser(BaseParser):
         except Exception as e:
             print(f"Ошибка при парсинге товара Эльдорадо: {e}")
             return None
+
+

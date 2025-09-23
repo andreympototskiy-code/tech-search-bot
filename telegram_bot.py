@@ -86,3 +86,5 @@ class TelegramNotifier:
             return loop.run_until_complete(self.send_error_notification(error_message))
         finally:
             loop.close()
+
+

@@ -110,3 +110,5 @@ if __name__ == "__main__":
     from config.settings import WEB_HOST, WEB_PORT, DEBUG
 
     app.run(host=WEB_HOST, port=WEB_PORT, debug=DEBUG)
+
+

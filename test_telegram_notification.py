@@ -112,3 +112,5 @@ if __name__ == "__main__":
     else:
         print("\n❌ Тест провалился!")
         sys.exit(1)
+
+

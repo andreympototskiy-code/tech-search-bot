@@ -65,3 +65,5 @@ class DNSParser(BaseParser):
         except Exception as e:
             print(f"Ошибка при парсинге товара DNS: {e}")
             return None
+
+

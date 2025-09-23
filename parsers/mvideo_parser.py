@@ -65,3 +65,5 @@ class MVideoParser(BaseParser):
         except Exception as e:
             print(f"Ошибка при парсинге товара М.Видео: {e}")
             return None
+
+

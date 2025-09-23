@@ -65,3 +65,5 @@ class CitilinkParser(BaseParser):
         except Exception as e:
             print(f"Ошибка при парсинге товара Ситилинк: {e}")
             return None
+
+

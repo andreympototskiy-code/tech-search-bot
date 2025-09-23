@@ -12,11 +12,12 @@ from datetime import datetime
 # Добавляем текущую директорию в путь для импортов
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from telegram import Update, Bot
+from telegram import Update, Bot, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
     MessageHandler,
+    CallbackQueryHandler,
     filters,
     ContextTypes,
 )
@@ -36,6 +37,26 @@ class TechSearchBot:
         self.bot_token = TELEGRAM_BOT_TOKEN
         # Словарь для хранения состояния пользователей (ожидание описания товара)
         self.user_states = {}
+        
+        # Популярные товары для быстрого поиска
+        self.popular_items = [
+            "iPhone 15 Pro 512 White",
+            "Dreame Bot L30 Ultra", 
+            "Dyson Complete Long Ceramic Pink"
+        ]
+
+    def create_search_keyboard(self):
+        """Создает inline клавиатуру с популярными товарами"""
+        keyboard = []
+        
+        # Добавляем кнопки для популярных товаров
+        for item in self.popular_items:
+            keyboard.append([InlineKeyboardButton(f"🔍 {item}", callback_data=f"search_{item}")])
+        
+        # Добавляем кнопку для ручного ввода
+        keyboard.append([InlineKeyboardButton("✏️ Ручной ввод", callback_data="manual_input")])
+        
+        return InlineKeyboardMarkup(keyboard)
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик команды /start"""
@@ -74,7 +95,36 @@ class TechSearchBot:
 Начните с `что ищем`! 🚀
         """
 
-        await update.message.reply_text(welcome_message, parse_mode="Markdown")
+        keyboard = self.create_search_keyboard()
+        await update.message.reply_text(welcome_message, parse_mode="Markdown", reply_markup=keyboard)
+
+    async def button_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Обработчик нажатий на inline кнопки"""
+        query = update.callback_query
+        await query.answer()
+        
+        if query.data.startswith("search_"):
+            # Извлекаем название товара из callback_data
+            item_name = query.data.replace("search_", "")
+            
+            # Выполняем поиск
+            await self.handle_search_request(update, context, item_name)
+            
+        elif query.data == "manual_input":
+            # Запрашиваем ручной ввод
+            user_id = query.from_user.id
+            self.user_states[user_id] = "waiting_for_product"
+            
+            await query.edit_message_text(
+                "📝 **Введите название товара для поиска**\n\n"
+                "**Примеры запросов:**\n"
+                "• iPhone 15 Pro 512 White\n"
+                "• MacBook Air M2 256gb\n"
+                "• PlayStation 5\n"
+                "• Samsung Galaxy S24\n\n"
+                "Или используйте /cancel для отмены",
+                parse_mode="Markdown"
+            )
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик команды /help"""
@@ -152,7 +202,14 @@ class TechSearchBot:
     ):
         """Обработчик запросов на поиск"""
         user_message = query_text or update.message.text.strip()
-        user_name = update.message.from_user.first_name or "Пользователь"
+        
+        # Получаем информацию о пользователе
+        if update.message:
+            user_name = update.message.from_user.first_name or "Пользователь"
+            chat_id = update.message.chat_id
+        else:
+            user_name = update.callback_query.from_user.first_name or "Пользователь"
+            chat_id = update.callback_query.message.chat_id
 
         logger.info(f"Получен запрос от {user_name}: {user_message}")
 
@@ -166,9 +223,17 @@ class TechSearchBot:
 Это может занять несколько минут.
         """
 
-        status_message = await update.message.reply_text(
-            searching_message, parse_mode="Markdown"
-        )
+        # Отправляем сообщение о начале поиска
+        if update.message:
+            status_message = await update.message.reply_text(
+                searching_message, parse_mode="Markdown"
+            )
+        else:
+            # Для callback запросов редактируем существующее сообщение
+            await update.callback_query.edit_message_text(
+                searching_message, parse_mode="Markdown"
+            )
+            status_message = update.callback_query.message
 
         try:
             # Выполняем поиск
@@ -325,6 +390,7 @@ class TechSearchBot:
         application.add_handler(CommandHandler("help", self.help_command))
         application.add_handler(CommandHandler("history", self.history_command))
         application.add_handler(CommandHandler("cancel", self.cancel_command))
+        application.add_handler(CallbackQueryHandler(self.button_callback))
         application.add_handler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
         )

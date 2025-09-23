@@ -118,3 +118,5 @@ if __name__ == "__main__":
     else:
         print("\n❌ Отладка провалилась!")
         sys.exit(1)
+
+
